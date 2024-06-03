@@ -152,6 +152,36 @@
                 console.error("Помилка при отриманні книг:", error);
             });
         }
+
+
+        const adminLink = document.querySelector('nav ul li a[href="admin.html"]');
+        if (adminLink) {
+            adminLink.addEventListener('click', function(event) {
+                event.preventDefault(); // Запобігаємо переходу за посиланням
+                if (!isLoggedIn()) {
+                    window.location.href = 'login.html';
+                } else {
+                    firebase.auth().onAuthStateChanged((user) => {
+                        if (user) {
+                            const docRef = db.collection("users").doc(user.uid);
+                            docRef.get().then((doc) => {
+                                if (doc.exists && doc.data().role === 'admin') {
+                                    window.location.href = 'admin.html';
+                                } else {
+                                    alert('Недостатньо прав для доступу до панелі адміністратора');
+                                    // Додаємо зупинку переходу
+                                    window.location.href = 'index.html';
+                                }
+                            }).catch((error) => {
+                                console.log("Помилка при отриманні документа:", error);
+                                window.location.href = 'index.html';
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
         
        
         function isLoggedIn() {
