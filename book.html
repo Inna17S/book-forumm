@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обговорення книги</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Книжковий форум</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Головна</a></li>
+                <li><a href="profile.html">Профіль</a></li>
+                <li><a href="admin.html">Адмін</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="book-details">
+          
+        </section>
+        <section id="discussion">
+            <h2>Обговорення</h2>
+            <form id="comment-form">
+                <label for="comment">Ваш коментар:</label><br>
+                <textarea id="comment" name="comment" required></textarea><br>
+                <button type="submit">Додати коментар</button>
+            </form>
+            <ul id="comments-list"></ul>
+        </section>
+
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        // Firebase конфігурація
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3RJq748NWWN6L6EUhWMuuzaQc39tme_E",
+            authDomain: "book-club-ac0b6.firebaseapp.com",
+            projectId: "book-club-ac0b6",
+            storageBucket: "book-club-ac0b6.appspot.com",
+            messagingSenderId: "1078139043211",
+            appId: "1:1078139043211:web:206cabee6f6e6df004b838e",
+            measurementId: "G-KYWTVJ3GH1"
+        };
+        // Ініціалізація Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Функція для додавання рейтингу користувача
+        function addRating(bookId, rating) {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                const ratingRef = db.collection('books').doc(bookId).collection('ratings').doc(user.uid);
+                ratingRef.set({
+                    rating: rating,
+                    user: user.uid,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    updateBookRating(bookId);
+                }).catch((error) => {
+                    console.error("Помилка при додаванні оцінки:", error);
+                });
+            } else {
+                alert('Ви повинні увійти, щоб залишити оцінку');
+            }
+        }
+
+        // Функція для оновлення середнього рейтингу книги
+        function updateBookRating(bookId) {
+            const ratingsRef = db.collection('books').doc(bookId).collection('ratings');
+            ratingsRef.get().then((querySnapshot) => {
+                let totalRating = 0;
+                let ratingCount = 0;
+
+                querySnapshot.forEach((doc) => {
+                    totalRating += doc.data().rating;
+                    ratingCount += 1;
+                });
+
+                const averageRating = ratingCount ? (totalRating / ratingCount).toFixed(1) : 0;
+
+                db.collection('books').doc(bookId).update({
+                    averageRating: parseFloat(averageRating),
+                    ratingCount: ratingCount
+                }).then(() => {
+                    document.getElementById('average-rating').textContent = `Рейтинг: ${averageRating}`;
+                    document.getElementById('rating-count').textContent = `Кількість оцінок: ${ratingCount}`;
+                }).catch((error) => {
+                    console.error("Помилка при оновленні рейтингу книги:", error);
+                });
+            });
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const bookId = params.get('id');
+            if (bookId) {
+                console.log('Book ID:', bookId);
+                fetchBookDetails(bookId);
+                fetchComments(bookId);
+            }
+
+            function fetchBookDetails(bookId) {
+                db.collection('books').doc(bookId).get().then((doc) => {
+                    if (doc.exists) {
+                        const book = doc.data();
+                        console.log('Book data:', book);
+
+                        
+                        db.collection('books').doc(bookId).collection('ratings').get().then((querySnapshot) => {
+                            let totalRating = 0;
+                            let ratingCount = 0;
+
+                            querySnapshot.forEach((doc) => {
+                                totalRating += doc.data().rating;
+                                ratingCount += 1;
+                            });
+
+                            const averageRating = ratingCount ? (totalRating / ratingCount).toFixed(1) : 0;
+
+                            document.getElementById('book-details').innerHTML = `
+                                <div class="book-header">
+                                    ${book.image ? `<img src="data:image/jpeg;base64,${book.image}" alt="Обкладинка книги" class="book-cover">` : ''}
+                                    <div class="book-info">
+                                        <h2>${book.title}</h2>
+                                        <p class="book-author">${book.author}</p>
+                                        <div class="book-rating">
+                                            <span id="average-rating">Рейтинг: ${averageRating}</span><br>
+                                            <span id="rating-count">Кількість оцінок: ${ratingCount}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="book-description">${book.description}</p>
+                                <div id="rating">
+                                    <label>Оцінити книгу:</label>
+                                    <span onclick="addRating('${bookId}', 1)">⭐</span>
+                                    <span onclick="addRating('${bookId}', 2)">⭐</span>
+                                    <span onclick="addRating('${bookId}', 3)">⭐</span>
+                                    <span onclick="addRating('${bookId}', 4)">⭐</span>
+                                    <span onclick="addRating('${bookId}', 5)">⭐</span>
+                                </div>
+                            `;
+                        }).catch((error) => {
+                            console.error("Помилка при отриманні рейтингу книги:", error);
+                        });
+                    } else {
+                        console.error("Книга не знайдена");
+                    }
+                }).catch((error) => {
+                    console.error("Помилка при отриманні книги:", error);
+                });
+            }
+            
+
+            // Отримання коментарів
+            function fetchComments(bookId) {
+                db.collection('books').doc(bookId).collection('comments').orderBy('timestamp', 'desc').get().then((querySnapshot) => {
+                    const commentsList = document.getElementById('comments-list');
+                    commentsList.innerHTML = '';
+                    querySnapshot.forEach((doc) => {
+                        const comment = doc.data();
+                        const listItem = `
+                            <li>
+                                <strong>${comment.username || 'Анонім'}</strong>
+                                <p>${comment.text}</p>
+                                <small>${new Date(comment.timestamp.toDate()).toLocaleString()}</small>
+                            </li>
+                        `;
+                        commentsList.insertAdjacentHTML('beforeend', listItem);
+                    });
+                }).catch((error) => {
+                    console.error("Помилка при отриманні коментарів:", error);
+                });
+            }
+
+            // Додавання нового коментаря
+            const commentForm = document.getElementById('comment-form');
+            if (commentForm) {
+                commentForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const commentText = document.getElementById('comment').value;
+                    auth.onAuthStateChanged((user) => {
+                        if (user) {
+                            const userRef = db.collection('users').doc(user.uid);
+                            userRef.get().then((doc) => {
+                                if (doc.exists) {
+                                    const username = doc.data().username;
+                                    db.collection('books').doc(bookId).collection('comments').add({
+                                        text: commentText,
+                                        user: user.uid,
+                                        username: username,
+                                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                                    }).then(() => {
+                                        alert('Коментар додано');
+                                        fetchComments(bookId); 
+                                        document.getElementById('comment').value = '';
+                                    }).catch((error) => {
+                                        console.error("Помилка при додаванні коментаря:", error);
+                                    });
+                                } else {
+                                    console.error("Користувач не знайдений");
+                                }
+                            }).catch((error) => {
+                                console.error("Помилка при отриманні користувача:", error);
+                            });
+                        } else {
+                            alert('Ви повинні увійти, щоб залишити коментар');
+                        }
+                    });
+                });
+            }
+
+          
+            document.addEventListener('DOMContentLoaded', function() {
+                const params = new URLSearchParams(window.location.search);
+                const bookId = params.get('id');
+                if (bookId) {
+                    fetchComments(bookId);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

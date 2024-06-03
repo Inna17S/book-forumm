@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Зареєструватися</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Зареєструватися</h1>
+    </header>
+    <main>
+        <section id="register-section">
+            <form id="register-form">
+                <div>
+                    <label for="name">Ім'я:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div>
+                    <label for="username">Логін (електронна адреса):</label>
+                    <input type="email" id="username" name="username" required>
+                </div>
+                <div>
+                    <label for="password">Пароль:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div>
+                    <label for="confirm-password">Підтвердити пароль:</label>
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                </div>
+                <button type="submit">Зареєструватися</button>
+            </form>
+        </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyC3RJq748NWWN6L6EUhWMuuzaQc39tme_E",
+          authDomain: "book-club-ac0b6.firebaseapp.com",
+          projectId: "book-club-ac0b6",
+          storageBucket: "book-club-ac0b6.appspot.com",
+          messagingSenderId: "1078139043211",
+          appId: "1:1078139043211:web:206cabee6f6e6df004b838e",
+          measurementId: "G-KYWTVJ3GH1"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const email = document.getElementById('username').value;
+            const username = document.getElementById('name').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (password !== confirmPassword) {
+                alert('Паролі не співпадають');
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    return db.collection('users').doc(user.uid).set({
+                        username: username,
+                        email: email,
+                        role: 'user' // або 'admin'
+                    });
+                })
+                .then(() => {
+                    alert('Реєстрація успішна!');
+                    window.location.href = 'index.html';
+                })
+                .catch((error) => {
+                    alert('Помилка при реєстрації: ' + error.message);
+                    console.error('Registration error:', error);
+                });
+        });
+    </script>
+</body>
+</html>

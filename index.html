@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Книжковий форум</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Книжковий форум</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Головна</a></li>
+                <li><a href="profile.html">Профіль</a></li>
+                <li><a href="admin.html">Адмін</a></li>
+            </ul>
+        </nav>
+        <nav class="auth-nav">
+            <div id="auth-buttons">
+                <button class="nav-button" onclick="window.location.href='login.html'"><span>Увійти</span></button>
+                <button class="nav-button" onclick="window.location.href='register.html'"><span>Зареєструватися</span></button>
+            </div>
+            <button id="logout-button" class="logout-button" style="display:none;" onclick="logoutUser()">Вийти</button>
+        </nav>
+    </header>
+    <main>
+        <section id="search-section">
+            <h2>Пошук книги для обговорення</h2>
+            <form id="search-form">
+                <input type="text" id="search-query" name="search-query" placeholder="Введіть автора або назву книги">
+                <button type="submit">Пошук</button>
+            </form>
+        </section>
+        <section id="results-section" style="display:none;">
+            <h2>Результати пошуку <button id="close-results">✖</button></h2>
+            <ul id="results-list"></ul>
+        </section>
+        <section id="add-book-section" style="display:none;">
+            <h2>Книгу не знайдено, ви можете її додати для обговорення</h2>
+            <button id="add-book-button">Додати книгу</button>
+        </section>
+        <section id="importance-section">
+            <h2>Про важливість не лише читати, а й говорити про книжки</h2>
+            <section id="quote-widget-section">
+                <div id="quote-widget" class="quote-widget">
+                    <p id="quote-text"></p>
+                </div>
+            <div class="regular-text">
+                <p>Іноді прочитати книгу недостатньо, виникає бажання обговорити прочитане, поділитися своїми враженнями, або почути думку товаришів по «читацькому цеху» чи професіоналів. Чому важливо читати книги, та ще важливіше, говорити про них?</p>
+                <p>Окрім спілкування з приємними та близькими за духом людьми, обговорення прочитаного, незалежно від форми (у фейсбуці, чаті в телеграмі, чи реальних розмовах) розвиває навички формулювати та висловлювати власні думки, до того ж робити це зрозуміло для присутніх.</p>
+                <p>Дискурс навколо літератури (тексту) дає можливість заглибитись у внутрішній світ співрозмовника, почути, як цей текст зрозуміли та сприйняли інші люди.</p>
+                <p>Обговорення прочитаної книги також формує в нас навички визначати головну ідею та сюжет, помічати приховані деталі, сатиру, алюзії, інтертекстуальність. Подібний аналіз поглиблює наше загальне розуміння твору та літ. процесів, що позитивно впливає на якість майбутнього читання. А ще, це непоганий розвиток мислення.</p>
+                <p>Зростання цікавості до науково-популярної та фахової літератури серед сучасних читачів уможливлює набуття професійного досвіду та додаткової корисної інформації під час подібного спілкування.</p>
+                <p>
+                    <img src="4.jpg" class="float-left" alt="Example Image">
+                    Якось за моєї участі, при обговоренні книги «Судити по совісті» Браяна Стівенсона, основними тезами дискусії були питання справедливості, расизму, поліцейської та адвокатської етики, порушені автором на сторінках книги. Та за декілька хвилин, випадково присутній на обговоренні (вінслоу кулб) чоловік зауважив, що він юрист-практик, а всі присутні мали можливість отримати кваліфікований коментар до книги, та послухати міні-лекцію порівняльного німецько-германської та англосаксонської правових систем. Неочікувано та цікаво, погодьтесь.
+                </p>
+                <p>Нерідко один і той самий текст для кожного з читачів має зовсім різну конотацію: «Норвезький ліс» Харукі Муракамі читач сприймає як мелодраматичний любовний роман, а можливо, як історію соціальної адаптації молодої людини, або ж навіть як філософське есе про стосунки людей та природи.</p>
+                <p>Якась частина меланхолічних читачів сприйматиме книгу виключно як роман, акцентуючи на мелодраматичних подіях сюжету.</p>
+                <p>Та знайдуться читачі, яких обурюватиме яскравий опис сексу та зваблення, непостійність героя в цьому плані.</p>
+                <p>Чим більша чисельність спільноти, що бере участь в дискурсі, тим насиченіше виокремлюються акценти, що справили враження на читачів. Нерідко екстралінгвістичні чинники можуть повідати про емоції від твору більше за вимовлені слова.</p>
+                <p>Вважаю, подібний досвід дозволяє повною мірою зануритися у всесвіт книги, зрозуміти мотиви героїв, та ще й вразити самого себе, подумки дивуючись, чому при читанні ти сам над цим не замислився, або не звернув на цей елемент увагу.</p>
+            </div>
+            <p class="quote">
+                <span class="quote-text">«Мені завжди цікаво, що читають люди. За книгами про них можна дізнатися не менше, ніж за вмістом домашньої аптечки. Тільки ритися в ліках господаря завжди вважалося поганим тоном»</span><br>
+                <span class="quote-author">Стівен Кінг</span>
+            </p>
+            <img src="7.jpg" class="centered-img" alt="Example Image">
+            <div class="regular-text">
+                <p>Особисто в мене при обговоренні книжок нерідко виникало відчуття «обмеженості», наче тобі не дано зрозуміти все те, що хотів сказати автор, а твій друг/співрозмовник/сусід це зрозумів. And this is good. Це означає, що мета досягнута – ваше оточення, читацький клуб, чи випадковий коментатор змогли показати частину твору, яка без їхньої присутності залишилася б в тіні, а ви, як казав мій університетський викладач історії, залишилися б «темними», не побувавши на цьому обговоренні.</p>
+                <p>Користь читання в дії – це коли у твоїх думках, чи в коментарях під твоїм дописом народжується нове розуміння. Коли за бесідою навколо книги ти вчишся слухати й говорити, а знайомі сюжети з банальною фабулою набувають нового, глибокого змісту. А ще, це відмінна можливість завести знайомства, та послухати поради щодо книжок, які ви маєте обов’язково прочитати!</p>
+            </div>
+        </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyC3RJq748NWWN6L6EUhWMuuzaQc39tme_E",
+          authDomain: "book-club-ac0b6.firebaseapp.com",
+          projectId: "book-club-ac0b6",
+          storageBucket: "book-club-ac0b6.appspot.com",
+          messagingSenderId: "1078139043211",
+          appId: "1:1078139043211:web:206cabeef6e6df004b838e",
+          measurementId: "G-KYWTWJ3GH1"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+        var auth = firebase.auth();
+
+
+        function getRandomQuote(quotes) {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            return quotes[randomIndex];
+        }
+
+        function displayQuote() {
+            const quoteText = document.getElementById('quote-text');
+            db.collection('Quote').get().then((querySnapshot) => {
+                const quotes = [];
+                querySnapshot.forEach((doc) => {
+                    quotes.push(doc.data().Quotes);
+                });
+                if (quotes.length > 0) {
+                    quoteText.textContent = getRandomQuote(quotes);
+                } else {
+                    quoteText.textContent = "Цитати не знайдено.";
+                }
+            }).catch((error) => {
+                console.error("Помилка при завантаженні цитат: ", error);
+            });
+        }
+
+        setInterval(displayQuote, 8000);
+        window.onload = displayQuote;
+
+
+        
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>

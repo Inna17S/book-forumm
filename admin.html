@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Адміністративна панель</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Книжковий форум</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Головна</a></li>
+                <li><a href="profile.html">Профіль</a></li>
+                <li><a href="admin.html">Адмін</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="user-management">
+            <h2>Управління користувачами</h2>
+            <ul id="user-list"></ul>
+        </section>
+        <section id="content-management">
+            <h2>Управління контентом</h2>
+            <ul id="content-list"></ul>
+        </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3RJq748NWWN6L6EUhWMuuzaQc39tme_E",
+            authDomain: "book-club-ac0b6.firebaseapp.com",
+            projectId: "book-club-ac0b6",
+            storageBucket: "book-club-ac0b6.appspot.com",
+            messagingSenderId: "1078139043211",
+            appId: "1:1078139043211:web:206cabee6f6e6df004b838e",
+            measurementId: "G-KYWTVJ3GH1"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUsers();
+            loadBooks();
+        });
+
+        function loadUsers() {
+            const userList = document.getElementById('user-list');
+            db.collection('users').get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const user = doc.data();
+                    const blockStatus = user.isBlocked ? "Розблокувати" : "Блокувати";
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `${user.email} <button onclick="toggleBlockUser('${doc.id}', ${user.isBlocked})">${blockStatus}</button>`;
+                    userList.appendChild(listItem);
+                });
+            }).catch((error) => {
+                console.error("Помилка при отриманні користувачів:", error);
+            });
+        }
+
+        function toggleBlockUser(userId, isBlocked) {
+            db.collection('users').doc(userId).update({
+                isBlocked: !isBlocked
+            }).then(() => {
+                alert(isBlocked ? 'Користувача розблоковано' : 'Користувача заблоковано');
+                location.reload(); 
+            }).catch((error) => {
+                console.error("Помилка при зміні статусу користувача:", error);
+            });
+        }
+
+        function loadBooks() {
+            const contentList = document.getElementById('content-list');
+            db.collection('books').get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const book = doc.data();
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `${book.title} <button onclick="editBook('${doc.id}')">Редагувати</button> <button onclick="deleteBook('${doc.id}')">Видалити</button>`;
+                    contentList.appendChild(listItem);
+                });
+            }).catch((error) => {
+                console.error("Помилка при отриманні книг:", error);
+            });
+        }
+
+        function editBook(bookId) {
+            openEditModal(bookId);
+        }
+
+        function deleteBook(bookId) {
+            db.collection('books').doc(bookId).delete().then(() => {
+                alert('Книгу видалено');
+                location.reload(); 
+            }).catch((error) => {
+                console.error("Помилка при видаленні книги:", error);
+            });
+        }
+
+       
+        function openEditModal(bookId) {
+            currentBookId = bookId; 
+            const modal = document.getElementById('edit-book-modal');
+            const closeModal = document.getElementById('close-modal');
+
+            
+            db.collection('books').doc(bookId).get().then((doc) => {
+                if (doc.exists) {
+                    const book = doc.data();
+                    document.getElementById('edit-book-title').value = book.title;
+                    document.getElementById('edit-book-author').value = book.author;
+                    document.getElementById('edit-book-description').value = book.description;
+                } else {
+                    alert("Документ не знайдено!");
+                }
+            }).catch((error) => {
+                console.error("Помилка при отриманні документа:", error);
+            });
+
+            modal.style.display = 'block';
+
+            closeModal.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+
+       
+        function closeEditModal() {
+            document.getElementById('edit-book-modal').style.display = 'none';
+        }
+
+        
+        document.getElementById('edit-book-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const bookId = currentBookId; 
+            const title = document.getElementById('edit-book-title').value;
+            const author = document.getElementById('edit-book-author').value;
+            const description = document.getElementById('edit-book-description').value;
+            const coverFile = document.getElementById('edit-book-cover').files[0];
+
+            const bookRef = db.collection('books').doc(bookId);
+
+            if (coverFile) {
+                const storageRef = firebase.storage().ref();
+                const coverRef = storageRef.child("book-covers/" + coverFile.name);
+                coverRef.put(coverFile).then((snapshot) => {
+                    return snapshot.ref.getDownloadURL();
+                }).then((coverURL) => {
+                    return bookRef.update({
+                        title: title,
+                        author: author,
+                        description: description,
+                        image: coverURL
+                    });
+                }).then(() => {
+                    alert('Книга успішно оновлена!');
+                    closeEditModal();
+                    location.reload(); 
+                }).catch((error) => {
+                    console.error("Помилка при оновленні книги:", error);
+                });
+            } else {
+                bookRef.update({
+                    title: title,
+                    author: author,
+                    description: description
+                }).then(() => {
+                    alert('Книга успішно оновлена!');
+                    closeEditModal();
+                    location.reload(); 
+                }).catch((error) => {
+                    console.error("Помилка при оновленні книги:", error);
+                });
+            }
+        });
+
+    </script>
+    <!-- Модальне вікно для редагування книги -->
+    <div id="edit-book-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-modal">&times;</span>
+            <h2>Редагувати книгу</h2>
+            <form id="edit-book-form">
+                <div>
+                    <label for="edit-book-title">Назва книги:</label>
+                    <input type="text" id="edit-book-title" name="edit-book-title" required>
+                </div>
+                <div>
+                    <label for="edit-book-author">Автор:</label>
+                    <input type="text" id="edit-book-author" name="edit-book-author" required>
+                </div>
+                <div>
+                    <label for="edit-book-description">Опис:</label>
+                    <textarea id="edit-book-description" name="edit-book-description" required></textarea>
+                </div>
+                <div>
+                    <label for="edit-book-cover">Обкладинка книги:</label>
+                    <input type="file" id="edit-book-cover" name="edit-book-cover" accept="image/*">
+                </div>
+                <button type="submit">Редагувати</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

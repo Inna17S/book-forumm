@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Додати книгу</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Додати нову книгу</h1>
+    </header>
+    <main>
+        <section id="add-book-section">
+            <form id="add-book-form">
+                <div>
+                    <label for="book-title">Назва книги:</label>
+                    <input type="text" id="book-title" name="book-title" required>
+                </div>
+                <div>
+                    <label for="book-author">Автор:</label>
+                    <input type="text" id="book-author" name="book-author" required>
+                </div>
+                <div>
+                    <label for="book-description">Опис:</label>
+                    <textarea id="book-description" name="book-description" required></textarea>
+                </div>
+                <div>
+                    <label for="book-cover">Обкладинка книги:</label>
+                    <input type="file" id="book-cover" name="book-cover" accept="image/*" required>
+                </div>
+                <button type="submit">Додати книгу</button>
+            </form>
+        </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script>
+        // Firebase конфігурація
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3RJq748NWWN6L6EUhWMuuzaQc39tme_E",
+            authDomain: "book-club-ac0b6.firebaseapp.com",
+            projectId: "book-club-ac0b6",
+            storageBucket: "book-club-ac0b6.appspot.com",
+            messagingSenderId: "1078139043211",
+            appId: "1:1078139043211:web:206cabee6f6e6df004b838e",
+            measurementId: "G-KYWTVJ3GH1"
+        };
+        // Ініціалізація Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        document.getElementById('add-book-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const title = document.getElementById('book-title').value;
+            const author = document.getElementById('book-author').value;
+            const description = document.getElementById('book-description').value;
+            const coverFile = document.getElementById('book-cover').files[0];
+
+            const reader = new FileReader();
+            reader.onloadend = function() {
+                const base64String = reader.result.replace('data:', '').replace(/^.+,/, '');
+                
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        addBookToDatabase(user.uid, title, author, description, base64String);
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                });
+            };
+            reader.readAsDataURL(coverFile);
+        });
+
+        function addBookToDatabase(userId, title, author, description, coverBase64) {
+            db.collection('books').add({
+                userId: userId,
+                title: title,
+                author: author,
+                description: description,
+                image: coverBase64
+            })
+            .then(() => {
+                alert('Книга успішно додана!');
+                window.location.href = 'index.html';
+            })
+            .catch((error) => {
+                alert('Помилка при додаванні книги: ' + error.message);
+                console.error('Add book error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
