@@ -29,6 +29,7 @@
                 <button type="submit">Додати коментар</button>
             </form>
             <ul id="comments-list"></ul>
+            <button id="load-more-comments" style="display: none;">Завантажити більше коментарів</button>
         </section>
 
     </main>
@@ -50,6 +51,46 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
+
+        let lastVisibleComment = null;
+
+        document.getElementById('load-more-comments').addEventListener('click', function() {
+            loadComments();
+        });
+
+        function loadComments() {
+            const bookId = new URLSearchParams(window.location.search).get('id');
+            let query = db.collection('books').doc(bookId).collection('comments').orderBy('timestamp', 'desc').limit(5);
+
+            if (lastVisibleComment) {
+                query = query.startAfter(lastVisibleComment);
+            }
+
+            query.get().then((querySnapshot) => {
+                const commentsList = document.getElementById('comments-list');
+
+                querySnapshot.forEach((doc) => {
+                    const comment = doc.data();
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <strong>${comment.username || 'Анонім'}</strong>
+                        <p>${comment.text}</p>
+                        <small>${new Date(comment.timestamp.toDate()).toLocaleString()}</small>
+                    `;
+                    commentsList.appendChild(listItem);
+                });
+
+                lastVisibleComment = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+                if (querySnapshot.size < 5) {
+                    document.getElementById('load-more-comments').style.display = 'none';
+                } else {
+                    document.getElementById('load-more-comments').style.display = 'block';
+                }
+            }).catch((error) => {
+                console.error('Error loading comments:', error);
+            });
+        }
 
         // Функція для додавання рейтингу користувача
         function addRating(bookId, rating) {
@@ -160,7 +201,7 @@
 
             // Отримання коментарів
             function fetchComments(bookId) {
-                db.collection('books').doc(bookId).collection('comments').orderBy('timestamp', 'desc').get().then((querySnapshot) => {
+                db.collection('books').doc(bookId).collection('comments').orderBy('timestamp', 'desc').limit(5).get().then((querySnapshot) => {
                     const commentsList = document.getElementById('comments-list');
                     commentsList.innerHTML = '';
                     querySnapshot.forEach((doc) => {
@@ -174,6 +215,14 @@
                         `;
                         commentsList.insertAdjacentHTML('beforeend', listItem);
                     });
+
+                    lastVisibleComment = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+                    if (querySnapshot.size < 5) {
+                        document.getElementById('load-more-comments').style.display = 'none';
+                    } else {
+                        document.getElementById('load-more-comments').style.display = 'block';
+                    }
                 }).catch((error) => {
                     console.error("Помилка при отриманні коментарів:", error);
                 });
