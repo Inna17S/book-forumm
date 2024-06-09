@@ -336,6 +336,58 @@ document.addEventListener("DOMContentLoaded", function () {
         loadUsers();
         loadBooks();
     }
+
+
+   
+    const weatherForm = document.getElementById('weather-form');
+    const cityInput = document.getElementById('city-input');
+    const weatherResult = document.getElementById('weather-result');
+    const cityName = document.getElementById('city-name');
+    const weatherDescription = document.getElementById('weather-description');
+    const weatherTemperature = document.getElementById('weather-temperature');
+    const loader = document.getElementById('loader');
+    const errorMessage = document.getElementById('error-message');
+    
+    weatherForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+    
+        const city = cityInput.value.trim();
+        if (!city) {
+            errorMessage.textContent = 'Будь ласка, введіть назву міста';
+            errorMessage.style.display = 'block';
+            return;
+        }
+    
+    
+        weatherResult.style.display = 'none';
+        errorMessage.style.display = 'none';
+        loader.style.display = 'block';
+    
+       
+        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=97edeeb3557bde14341949195ad6cb7b&units=metric&lang=ua`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Помилка при отриманні даних');
+                }
+                return response.json();
+            })
+            .then(data => {
+                
+                loader.style.display = 'none';
+    
+               
+                cityName.textContent = data.name;
+                weatherDescription.textContent = `Опис: ${data.weather[0].description}`;
+                weatherTemperature.textContent = `Температура: ${data.main.temp}°C`;
+                weatherResult.style.display = 'block';
+            })
+            .catch(error => {
+                loader.style.display = 'none';
+                errorMessage.textContent = 'Не вдалося отримати дані. Спробуйте ще раз.';
+                errorMessage.style.display = 'block';
+            });
+    });
+
 });
 
 

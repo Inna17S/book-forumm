@@ -87,6 +87,42 @@ nav.auth-nav button:hover {
   text-shadow: 0 0 10px #fff, 0 0 10px #fff, 0 0 10px #fff, 0 0 10px #fff, 0 0 50px #fff, 0 0 10px #fff, 0 0 10px #fff;
 }
 
+
+body.light-theme {
+  background-color: #000000;
+  color: #000000;
+}
+
+
+body.dark-theme {
+  background-color: #121212;
+  color: #000000;
+}
+
+
+body.dark-theme header {
+  background-color: #333333;
+}
+
+body.dark-theme nav ul li a {
+  color: #000000;
+}
+
+body.dark-theme nav ul li a:hover {
+  background-color: #555555;
+}
+
+body.dark-theme .quote-widget {
+  background-color: #444444;
+  color: #000000;
+}
+
+body.dark-theme main {
+  background: rgba(34, 34, 34, 0.8); 
+  color: #000000;
+}
+
+
 .logout-button {
   padding: 10px 20px;
   background-color: #333;
@@ -617,4 +653,77 @@ ul li:hover {
     text-align: center;
     max-width: 500px;
     margin: 20px auto; 
+}
+
+#weather-section {
+  text-align: center;
+  margin: 20px;
+}
+
+#weather-section h2 {
+    font-family: 'Great Vibes', cursive;
+    font-size: 2em;
+    color: white;
+}
+
+#weather-form {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+#city-input {
+  font-size: 1em;
+  padding: 10px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+#weather-form button {
+  font-size: 1em;
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#weather-form button:hover {
+  background-color: #555;
+}
+
+#weather-result-container {
+  display: flex;
+  justify-content: center;
+}
+
+#weather-result {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  margin-top: 20px;
+  display: inline-block;
+  max-width: 300px;
+  width: 100%;
+}
+
+#weather-result h3 {
+  font-family: 'Great Vibes', cursive;
+  font-size: 1.5em;
+  margin: 0 0 10px;
+}
+
+#weather-result p {
+  font-size: 1em;
+  margin: 5px 0;
+}
+
+#loader {
+  font-size: 1.2em;
+  color: #333;
+  display: inline-block;
+  margin-top: 20px;
 }

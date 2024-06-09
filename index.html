@@ -74,6 +74,23 @@
             </div>
         </section>
     </main>
+    <section id="weather-section">
+        <h2>Дізнатися погоду</h2>
+        <form id="weather-form">
+            <input type="text" id="city-input" placeholder="Введіть назву міста">
+            <button type="submit">Отримати прогноз</button>
+        </form>
+        <div id="weather-result-container">
+            <div id="weather-result" style="display:none;">
+                <h3>Прогноз погоди для <span id="city-name"></span></h3>
+                <p id="weather-description"></p>
+                <p id="weather-temperature"></p>
+            </div>
+        </div>
+        <div id="loader" style="display:none;">Завантаження...</div>
+        <div id="error-message" style="display:none; color: red;"></div>
+    </section>
+
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
@@ -120,6 +137,54 @@
 
 
         
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const hour = new Date().getHours();
+            const body = document.body;
+
+            if (hour >= 6 && hour < 20) {
+                body.classList.add('light-theme');
+            } else {
+                body.classList.add('dark-theme');
+            }
+
+            
+            const user = getCookie('user');
+            if (user) {
+              а
+                document.getElementById('auth-buttons').style.display = 'none';
+                document.getElementById('logout-button').style.display = 'block';
+            } else {
+              
+                document.getElementById('auth-buttons').style.display = 'block';
+                document.getElementById('logout-button').style.display = 'none';
+            }
+        });
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        function logoutUser() {
+            document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            location.reload();
+        }
+
+    
+        function loginUser(username) {
+            setCookie('user', username, 7); 
+            location.reload();
+        }
+
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = "expires=" + d.toUTCString();
+            document.cookie = name + "=" + value + ";" + expires + ";path=/";
+        }
     </script>
     <script src="script.js"></script>
 </body>
